@@ -1,4 +1,5 @@
-Set-Content -Path "next.config.mjs" -Value "/** @type {import('next').NextConfig} */
+@'
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
@@ -8,4 +9,5 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;" -Encoding UTF8
+export default nextConfig;
+'@ | Out-File -FilePath "next.config.mjs" -Encoding utf8
