@@ -1,15 +1,14 @@
 import { supabase } from '@/lib/supabaseClient';
 import KhmerLuxuryGold from '@/components/templates/KhmerLuxuryGold';
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ to?: string }>;
-}) {
-  const { slug } = await params;
-  const { to } = await searchParams;
+interface Props {
+  params: { slug: string };
+  searchParams: { to?: string };
+}
+
+export default async function Page({ params, searchParams }: Props) {
+  const slug = params?.slug;
+  const to = searchParams?.to;
 
   const { data: invitation } = await supabase
     .from('invitations')
