@@ -1,4 +1,14 @@
-<h1 className="khmer-title-moul text-2xl sm:text-4xl lg:text-5xl text-amber-100 mb-2">
-  <span className="block mb-3">ធៀបការឌីជីថល</span>
-  <span className="text-[#C5A059] block">ប្រណិត ថ្លៃថ្នូរ និងទាន់សម័យ</span>
-</h1>
+<div className="space-y-4 my-6">
+  <h1 
+    className="font-['Moul'] text-2xl sm:text-4xl lg:text-5xl text-amber-100 font-normal tracking-wide"
+    style={{ lineHeight: '2.5' }}
+  >
+    ធៀបការឌីជីថល
+  </h1>
+  <p 
+    className="font-['Moul'] text-xl sm:text-3xl lg:text-4xl text-[#C5A059] font-normal tracking-wide"
+    style={{ lineHeight: '2.5' }}
+  >
+    ប្រណិត ថ្លៃថ្នូរ និងទាន់សម័យ
+  </p>
+</div>
