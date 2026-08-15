@@ -11,7 +11,7 @@ import {
   CheckCircle2 
 } from 'lucide-react';
 
-export default function RoyalPalaceTemplate() {
+export default function RoyalPalacePage() {
   const searchParams = useSearchParams();
   const guestParam = searchParams.get('to');
   const guestName = guestParam ? guestParam.replace(/_/g, ' ') : 'ភ្ញៀវកិត្តិយស';
@@ -99,7 +99,7 @@ export default function RoyalPalaceTemplate() {
 
       <div className="max-w-lg mx-auto bg-[#1C0507] min-h-screen border-x border-amber-900/50 shadow-2xl relative pb-20">
         
-        {/* Header */}
+        {/* Top Header */}
         <div className="pt-16 pb-12 text-center px-6 space-y-4 relative overflow-hidden">
           <div className="w-16 h-16 mx-auto rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-[#DFBA73]">
             <Crown className="w-8 h-8" />
@@ -115,7 +115,7 @@ export default function RoyalPalaceTemplate() {
             </h1>
           </div>
 
-          {/* Guest Name Box */}
+          {/* Guest Card */}
           <div className="bg-[#2A080C] p-4 rounded-2xl border border-amber-500/30 shadow-lg space-y-1 my-6">
             <p className="text-xs text-amber-300/80">សូមគោរពអញ្ជើញ</p>
             <p className="text-base sm:text-lg font-bold text-amber-100">{guestName}</p>
@@ -178,7 +178,7 @@ export default function RoyalPalaceTemplate() {
           </a>
         </div>
 
-        {/* KHQR Gift */}
+        {/* KHQR */}
         <div className="px-6 py-8 space-y-6 border-t border-amber-900/40 text-center">
           <div className="space-y-1">
             <h3 className="font-['Moul'] text-lg text-amber-100 font-normal" style={{ lineHeight: '2.0' }}>
@@ -189,7 +189,7 @@ export default function RoyalPalaceTemplate() {
 
           <div className="bg-white p-4 rounded-3xl inline-block shadow-2xl border-4 border-[#DFBA73]">
             <img 
-              src="https://api.qrserver.com/v1/create-qr-code/?size=180x180" 
+              src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=KHQR_WEDDING_DEMO" 
               alt="KHQR Code" 
               className="w-44 h-44 mx-auto"
             />
