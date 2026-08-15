@@ -2,20 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
-  Heart, 
-  Calendar, 
-  MapPin, 
+  Crown, 
   Clock, 
-  Music, 
+  MapPin, 
   Volume2, 
   VolumeX, 
-  QrCode, 
   Send, 
-  CheckCircle2, 
-  Sparkles,
-  Crown
+  CheckCircle2 
 } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
 
 export default function RoyalPalaceTemplate() {
   const searchParams = useSearchParams();
@@ -25,7 +19,6 @@ export default function RoyalPalaceTemplate() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
-  // Form states
   const [attending, setAttending] = useState(true);
   const [guestCount, setGuestCount] = useState(1);
   const [rsvpSent, setRsvpSent] = useState(false);
@@ -54,7 +47,6 @@ export default function RoyalPalaceTemplate() {
     }
   };
 
-  // ផ្ញើ RSVP & Alert ចូល Telegram
   const handleRsvpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -74,7 +66,6 @@ export default function RoyalPalaceTemplate() {
     }
   };
 
-  // ផ្ញើសារជូនពរ & Alert ចូល Telegram
   const handleWishSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!wishMessage.trim()) return;
@@ -106,10 +97,9 @@ export default function RoyalPalaceTemplate() {
         {isPlaying ? <Volume2 className="w-5 h-5 animate-pulse" /> : <VolumeX className="w-5 h-5" />}
       </button>
 
-      {/* Main Container */}
       <div className="max-w-lg mx-auto bg-[#1C0507] min-h-screen border-x border-amber-900/50 shadow-2xl relative pb-20">
         
-        {/* Top Royal Header */}
+        {/* Header */}
         <div className="pt-16 pb-12 text-center px-6 space-y-4 relative overflow-hidden">
           <div className="w-16 h-16 mx-auto rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-[#DFBA73]">
             <Crown className="w-8 h-8" />
@@ -125,13 +115,12 @@ export default function RoyalPalaceTemplate() {
             </h1>
           </div>
 
-          {/* Guest Name Card */}
+          {/* Guest Name Box */}
           <div className="bg-[#2A080C] p-4 rounded-2xl border border-amber-500/30 shadow-lg space-y-1 my-6">
             <p className="text-xs text-amber-300/80">សូមគោរពអញ្ជើញ</p>
             <p className="text-base sm:text-lg font-bold text-amber-100">{guestName}</p>
           </div>
 
-          {/* Couple Names */}
           <div className="space-y-3 pt-2">
             <h2 className="text-2xl sm:text-3xl font-['Moul'] text-[#DFBA73] font-normal" style={{ lineHeight: '2.0' }}>
               គីមស៊ុន & ចាន់ណេត
@@ -142,7 +131,7 @@ export default function RoyalPalaceTemplate() {
           </div>
         </div>
 
-        {/* Schedule & Program */}
+        {/* Schedule */}
         <div className="px-6 py-8 space-y-6">
           <div className="text-center space-y-1">
             <h3 className="font-['Moul'] text-lg text-amber-100 font-normal" style={{ lineHeight: '2.0' }}>
@@ -170,7 +159,7 @@ export default function RoyalPalaceTemplate() {
           </div>
         </div>
 
-        {/* Location & Map */}
+        {/* Location */}
         <div className="px-6 py-8 space-y-6 border-t border-amber-900/40">
           <div className="text-center space-y-1">
             <h3 className="font-['Moul'] text-lg text-amber-100 font-normal" style={{ lineHeight: '2.0' }}>
@@ -200,7 +189,7 @@ export default function RoyalPalaceTemplate() {
 
           <div className="bg-white p-4 rounded-3xl inline-block shadow-2xl border-4 border-[#DFBA73]">
             <img 
-              src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=KHQR_WEDDING_DEMO" 
+              src="https://api.qrserver.com/v1/create-qr-code/?size=180x180" 
               alt="KHQR Code" 
               className="w-44 h-44 mx-auto"
             />
