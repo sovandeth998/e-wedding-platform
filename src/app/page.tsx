@@ -1,14 +1,6 @@
-<div className="space-y-3 my-4">
-  <h1 
-    className="font-['Moul'] text-3xl sm:text-4xl lg:text-5xl text-amber-100 font-normal tracking-wide whitespace-nowrap"
-    style={{ lineHeight: '1.8' }}
-  >
-    ធៀបការឌីជីថល
-  </h1>
-  <p 
-    className="font-['Kantumruy_Pro'] text-base sm:text-xl lg:text-2xl text-[#C5A059] font-medium tracking-wide whitespace-nowrap"
-    style={{ lineHeight: '1.6' }}
-  >
+<h1 className="text-3xl sm:text-5xl lg:text-6xl font-normal font-['Moul'] text-amber-100 leading-[1.8] space-y-2">
+  <span className="block">ធៀបការឌីជីថល</span>
+  <span className="block text-base sm:text-xl lg:text-2xl font-['Kantumruy_Pro'] font-medium text-[#C5A059] tracking-wider whitespace-nowrap">
     ប្រណិត ថ្លៃថ្នូរ និងទាន់សម័យ
-  </p>
-</div>
+  </span>
+</h1>
