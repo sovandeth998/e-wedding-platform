@@ -1,220 +1,349 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   Users, 
-  Link as LinkIcon, 
-  Copy, 
   Send, 
+  Copy, 
+  Check, 
   Download, 
   Plus, 
   Trash2, 
-  CheckCircle,
-  ExternalLink
+  ExternalLink, 
+  Share2, 
+  Sparkles,
+  ArrowLeft,
+  Search,
+  MessageSquare
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface GuestItem {
   id: string;
   name: string;
-  link: string;
-  status: 'pending' | 'sent';
+  phone?: string;
+  table_no?: string;
+  sent_status?: boolean;
 }
 
 export default function GuestManagerPage() {
-  const [slug, setSlug] = useState('kimsun-channet-2026'); // Slug នៃធៀបការ
+  const [slug, setSlug] = useState('kimsun-channet-2026');
   const [bulkInput, setBulkInput] = useState('');
-  const [guests, setGuests] = useState<GuestItem[]>([
-    { id: '1', name: 'ឯកឧត្តម ជា ស៊ីវុត្ថា និង លោកជំទាវ', link: '', status: 'pending' },
-    { id: '2', name: 'លោកជំទាវ ម៉ៅ ស្រីពៅ', link: '', status: 'pending' },
-    { id: '3', name: 'បងប្រុស រិទ្ធី និង ភរិយា', link: '', status: 'pending' },
+  const [guestList, setGuestList] = useState<GuestItem[]>([
+    { id: '1', name: 'ឯកឧត្តម សុខ សាន្ត និង លោកជំទាវ', table_no: 'VIP-01', sent_status: false },
+    { id: '2', name: 'លោកជំទាវ ហ៊ុន ម៉ាលីកា', table_no: 'VIP-02', sent_status: false },
+    { id: '3', name: 'បងប្រុស រិទ្ធី និង ភរិយា', table_no: 'A-05', sent_status: true },
+    { id: '4', name: 'កញ្ញា ធីតា និង មិត្តភក្តិ', table_no: 'B-02', sent_status: false },
   ]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [invitationData, setInvitationData] = useState<any>(null);
+  const [baseUrl, setBaseUrl] = useState('');
 
-  // Generate Links for existing and new guests
-  const getFullLink = (guestName: string) => {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://yourdomain.com';
-    return `${baseUrl}/${slug}?to=${encodeURIComponent(guestName)}`;
-  };
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setBaseUrl(window.location.origin);
+    }
 
-  // Handle Bulk Add Guests from Textarea
-  const handleBulkAdd = () => {
+    // ព្យាយាមទាញយក Invitation ចុងក្រោយពី Supabase
+    async function loadLatestInvitation() {
+      try {
+        const { data } = await supabase
+          .from('invitations')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        if (data) {
+          setInvitationData(data);
+          if (data.slug) setSlug(data.slug);
+        }
+      } catch (err) {}
+    }
+    loadLatestInvitation();
+  }, []);
+
+  // បន្ថែមឈ្មោះភ្ញៀវច្រើននាក់ក្នុងពេលតែមួយ (Bulk Add)
+  const handleBulkAdd = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!bulkInput.trim()) return;
-    
-    const lines = bulkInput.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    const newItems: GuestItem[] = lines.map((name, idx) => ({
-      id: Date.now() + '-' + idx,
+
+    const names = bulkInput
+      .split('\n')
+      .map((n) => n.trim())
+      .filter((n) => n.length > 0);
+
+    const newGuests: GuestItem[] = names.map((name, index) => ({
+      id: `${Date.now()}-${index}`,
       name: name,
-      link: getFullLink(name),
-      status: 'pending'
+      table_no: '',
+      sent_status: false,
     }));
 
-    setGuests(prev => [...prev, ...newItems]);
+    setGuestList([...newGuests, ...guestList]);
     setBulkInput('');
-    alert(`🎉 បានបន្ថែមភ្ញៀវចំនួន ${newItems.length} នាក់ដោយជោគជ័យ!`);
   };
 
-  // Copy Single Guest Link
-  const handleCopyLink = (name: string) => {
-    const link = getFullLink(name);
-    navigator.clipboard.writeText(link).then(() => {
-      alert(`បានចម្លង Link សម្រាប់ "${name}" រួចរាល់!`);
-    });
+  // លុបភ្ញៀវម្នាក់ចេញ
+  const handleDeleteGuest = (id: string) => {
+    setGuestList(guestList.filter((g) => g.id !== id));
   };
 
-  // Send via Telegram
-  const handleSendTelegram = (name: string) => {
-    const link = getFullLink(name);
-    const text = `សូមគោរពអញ្ជើញ ${name} ចូលរួមជាអធិបតី និងជាភ្ញៀវកិត្តិយសក្នុងពិធីអាពាហ៍ពិពាហ៍របស់យើងខ្ញុំ តាមរយៈតំណភ្ជាប់ធៀបការខាងក្រោម៖\n\n${link}`;
-    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
-    window.open(tgUrl, '_blank');
+  // បង្កើត Invitation URL សម្រាប់ភ្ញៀវម្នាក់ៗ
+  const getGuestUrl = (guestName: string) => {
+    const encodedName = encodeURIComponent(guestName.replace(/\s+/g, '_'));
+    return `${baseUrl}/${slug}?to=${encodedName}`;
   };
 
-  // Export to CSV
-  const handleExportCSV = () => {
-    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-    csvContent += "ឈ្មោះភ្ញៀវ (Guest Name),តំណភ្ជាប់ធៀបការ (Invitation Link)\n";
+  // បង្កើតសារសម្រាប់ផ្ញើ (Message Template)
+  const getInvitationMessage = (guestName: string) => {
+    const link = getGuestUrl(guestName);
+    const groom = invitationData?.groom_name || 'គីមស៊ុន';
+    const bride = invitationData?.bride_name || 'ចាន់ណេត';
+    const date = invitationData?.event_date || 'ថ្ងៃអាទិត្យ ទី១៥ ខែវិច្ឆិកា ឆ្នាំ២០២៦';
+
+    return `សូមគោរពអញ្ជើញ ${guestName} ចូលរួមជាអធិបតី និងជាភ្ញៀវកិត្តិយសក្នុងពិធីអាពាហ៍ពិពាហ៍របស់យើងខ្ញុំ (${groom} & ${bride}) ដែលនឹងប្រព្រឹត្តទៅនៅ ${date}។\n\nសូមចុចលើ Link ខាងក្រោមដើម្បីបើកមើលធៀបការឌីជីថល៖\n👉 ${link}`;
+  };
+
+  // 1-Click Send to Telegram
+  const handleSendTelegram = (guest: GuestItem) => {
+    const message = getInvitationMessage(guest.name);
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(getGuestUrl(guest.name))}&text=${encodeURIComponent(message)}`;
     
-    guests.forEach(g => {
-      csvContent += `"${g.name}","${getFullLink(g.name)}"\n`;
-    });
+    // សម្គាល់ថាបានផ្ញើរួច
+    setGuestList(
+      guestList.map((g) => (g.id === guest.id ? { ...g, sent_status: true } : g))
+    );
 
+    window.open(telegramUrl, '_blank');
+  };
+
+  // Copy Link ចូល Clipboard
+  const handleCopy = (guestId: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(guestId);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Export បញ្ជីឈ្មោះ និង Link ជា CSV/Excel
+  const handleExportCSV = () => {
+    const headers = ['No', 'Guest Name', 'Table No', 'Sent Status', 'Invitation URL'];
+    const rows = guestList.map((g, idx) => [
+      idx + 1,
+      `"${g.name}"`,
+      `"${g.table_no || ''}"`,
+      g.sent_status ? 'Sent' : 'Pending',
+      `"${getGuestUrl(g.name)}"`,
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Wedding_Guest_List_${slug}.csv`);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Wedding_Guest_List_${slug}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const removeGuest = (id: string) => {
-    setGuests(guests.filter(g => g.id !== id));
-  };
+  const filteredGuests = guestList.filter((g) =>
+    g.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const sentCount = guestList.filter((g) => g.sent_status).length;
 
   return (
-    <div className="min-h-screen bg-[#141518] text-stone-200 py-10 px-4 md:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        
-        {/* Header */}
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#C5A059] bg-amber-950/40 px-4 py-1.5 rounded-full border border-amber-500/20 mb-3">
-            <Users className="w-3.5 h-3.5" /> Guest Manager
-          </div>
-          <h1 className="text-2xl md:text-4xl font-bold font-['Moul'] text-amber-100">
-            គ្រប់គ្រង និងបង្កើត Link ជូនភ្ញៀវ
-          </h1>
-          <p className="text-xs md:text-sm text-stone-400 mt-2">
-            បង្កើត Link ឈ្មោះភ្ញៀវម្នាក់ៗស្វ័យប្រវត្តិ ងាយស្រួលផ្ញើតាម Telegram ឬ Facebook
-          </p>
-        </div>
-
-        {/* Wedding Slug Configuration */}
-        <div className="bg-stone-900/90 rounded-2xl p-5 border border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs">
-            <span className="text-stone-400">ធៀបការបច្ចុប្បន្ន: </span>
-            <span className="text-amber-300 font-mono font-bold">/{slug}</span>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <input 
-              type="text" 
-              value={slug} 
-              onChange={e => setSlug(e.target.value)} 
-              placeholder="កែប្រែ Slug"
-              className="bg-stone-950 border border-stone-700 text-xs px-3 py-2 rounded-xl text-stone-200 focus:outline-none focus:border-amber-400"
-            />
-          </div>
-        </div>
-
-        {/* Bulk Add Box */}
-        <div className="bg-stone-900/90 rounded-2xl p-6 border border-stone-800 space-y-4 shadow-lg">
-          <div className="flex items-center justify-between border-b border-stone-800 pb-3">
-            <h3 className="text-[#C5A059] font-bold text-sm flex items-center gap-2">
-              <Plus className="w-4 h-4" /> បញ្ចូលឈ្មោះភ្ញៀវច្រើននាក់ក្នុងពេលតែមួយ (Bulk Add)
-            </h3>
-            <span className="text-[11px] text-stone-500">១ ជួរ = ភ្ញៀវ ១ នាក់</span>
-          </div>
-
-          <textarea
-            rows={4}
-            value={bulkInput}
-            onChange={e => setBulkInput(e.target.value)}
-            placeholder="ឧទាហរណ៍៖&#10;ឯកឧត្តម សុខ សាន្ត និង លោកជំទាវ&#10;បងប្រុស ពិសិដ្ឋ&#10;មិត្តភក្តិ រដ្ឋា និង ភរិយា"
-            className="w-full bg-stone-950 border border-stone-700 rounded-xl p-3 text-xs md:text-sm text-stone-100 focus:outline-none focus:border-amber-400 placeholder:text-stone-600 font-sans"
-          />
-
-          <div className="flex justify-end">
-            <button
-              onClick={handleBulkAdd}
-              className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-stone-950 font-bold px-6 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow transition"
+    <div className="min-h-screen bg-[#0F1115] text-stone-100 font-sans pb-20">
+      
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-[#0F1115]/90 backdrop-blur-md border-b border-stone-800">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/dashboard"
+              className="p-2 rounded-xl bg-stone-900 border border-stone-800 text-stone-300 hover:text-white transition"
             >
-              <Plus className="w-4 h-4" /> បង្កើត Links ទាំងអស់
-            </button>
-          </div>
-        </div>
-
-        {/* Guest List Display */}
-        <div className="bg-stone-900/90 rounded-2xl p-6 border border-stone-800 space-y-4 shadow-lg">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-800 pb-3">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
             <div>
-              <h3 className="text-stone-100 font-bold text-sm flex items-center gap-2">
-                <Users className="w-4 h-4 text-amber-400" /> បញ្ជីឈ្មោះភ្ញៀវ ({guests.length} នាក់)
-              </h3>
+              <h1 className="text-lg md:text-xl font-bold text-amber-100 flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#DFBA73]" /> បញ្ជីភ្ញៀវ & Telegram Direct Invite
+              </h1>
+              <p className="text-xs text-stone-400">គ្រប់គ្រងឈ្មោះភ្ញៀវ និងផ្ញើធៀបការចូល Telegram ម្នាក់ៗដោយ ១ ឃ្លីក</p>
             </div>
-            {guests.length > 0 && (
-              <button
-                onClick={handleExportCSV}
-                className="bg-stone-800 hover:bg-stone-700 text-amber-300 border border-stone-700 px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition"
-              >
-                <Download className="w-3.5 h-3.5" /> ទាញយកជា Excel (CSV)
-              </button>
-            )}
           </div>
 
-          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-            {guests.map((guest, idx) => {
-              const fullUrl = getFullLink(guest.name);
-              return (
-                <div key={guest.id} className="bg-stone-950 p-3.5 rounded-xl border border-stone-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 hover:border-amber-500/30 transition">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-stone-500 text-xs font-mono">{idx + 1}.</span>
-                      <p className="font-bold text-amber-100 text-xs md:text-sm truncate">{guest.name}</p>
-                    </div>
-                    <p className="text-[11px] text-stone-500 font-mono truncate mt-0.5">{fullUrl}</p>
-                  </div>
+          <button
+            onClick={handleExportCSV}
+            className="hidden sm:inline-flex items-center gap-2 bg-stone-900 hover:bg-stone-800 text-stone-200 border border-stone-700 px-4 py-2 rounded-xl text-xs font-semibold transition"
+          >
+            <Download className="w-4 h-4 text-emerald-400" /> Export ជា Excel (CSV)
+          </button>
+        </div>
+      </header>
 
-                  <div className="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 border-stone-800 pt-2 md:pt-0">
-                    <button
-                      onClick={() => window.open(fullUrl, '_blank')}
-                      title="Preview"
-                      className="bg-stone-800 hover:bg-stone-700 text-stone-300 p-2 rounded-lg text-xs"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleCopyLink(guest.name)}
-                      className="bg-stone-800 hover:bg-stone-700 text-amber-300 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition border border-stone-700"
-                    >
-                      <Copy className="w-3.5 h-3.5" /> Copy Link
-                    </button>
-                    <button
-                      onClick={() => handleSendTelegram(guest.name)}
-                      className="bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition"
-                    >
-                      <Send className="w-3.5 h-3.5" /> Telegram
-                    </button>
-                    <button
-                      onClick={() => removeGuest(guest.id)}
-                      className="text-stone-600 hover:text-rose-400 p-1.5 transition"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-4 md:px-8 pt-8 space-y-8">
+        
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-stone-900/80 p-5 rounded-2xl border border-stone-800">
+            <p className="text-xs text-stone-400 font-medium">ចំនួនភ្ញៀវសរុប</p>
+            <p className="text-2xl font-bold text-amber-200 font-mono mt-1">{guestList.length} នាក់</p>
+          </div>
+          <div className="bg-stone-900/80 p-5 rounded-2xl border border-stone-800">
+            <p className="text-xs text-stone-400 font-medium">បានផ្ញើធៀបការរួច</p>
+            <p className="text-2xl font-bold text-emerald-400 font-mono mt-1">{sentCount} នាក់</p>
+          </div>
+          <div className="bg-stone-900/80 p-5 rounded-2xl border border-stone-800">
+            <p className="text-xs text-stone-400 font-medium">នៅសល់មិនទាន់ផ្ញើ</p>
+            <p className="text-2xl font-bold text-amber-500 font-mono mt-1">{guestList.length - sentCount} នាក់</p>
           </div>
         </div>
 
-      </div>
+        {/* Bulk Add Section */}
+        <div className="bg-stone-900/60 p-6 rounded-3xl border border-stone-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-stone-200 flex items-center gap-2">
+                <Plus className="w-4 h-4 text-[#DFBA73]" /> បន្ថែមបញ្ជីឈ្មោះភ្ញៀវច្រើននាក់ (Bulk Paste)
+              </h2>
+              <p className="text-xs text-stone-400 mt-0.5">
+                ចម្លង (Copy) បញ្ជីឈ្មោះភ្ញៀវពី Excel ឬ Telegram រួច Paste ចូលទីនេះ (១ ជួរ ឈ្មោះភ្ញៀវ ១ នាក់)
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleBulkAdd} className="space-y-3">
+            <textarea
+              rows={4}
+              value={bulkInput}
+              onChange={(e) => setBulkInput(e.target.value)}
+              placeholder="ឧទាហរណ៍៖&#10;ឯកឧត្តម សុខ សាន្ត និង លោកជំទាវ&#10;លោកជំទាវ ហ៊ុន ម៉ាលីកា&#10;បងប្រុស រិទ្ធី និង ភរិយា&#10;កញ្ញា សុគន្ធ ធីតា"
+              className="w-full bg-[#181a1f] border border-stone-700 rounded-2xl p-4 text-xs md:text-sm text-stone-100 placeholder:text-stone-600 focus:outline-none focus:border-amber-500"
+            />
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-stone-950 px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold shadow-md hover:brightness-110 active:scale-95 transition"
+              >
+                + បង្កើត Links សម្រាប់ភ្ញៀវទាំងអស់
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Guest List & Table */}
+        <div className="bg-stone-900/60 rounded-3xl border border-stone-800 overflow-hidden space-y-4 p-6">
+          
+          {/* Search & Actions Bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 text-stone-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="ស្វែងរកឈ្មោះភ្ញៀវ..."
+                className="w-full bg-[#181a1f] border border-stone-700 rounded-xl pl-10 pr-4 py-2 text-xs md:text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-amber-500"
+              />
+            </div>
+            <p className="text-xs text-stone-400 self-end sm:self-center">
+              បង្ហាញ {filteredGuests.length} ក្នុងចំណោម {guestList.length} នាក់
+            </p>
+          </div>
+
+          {/* List Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs md:text-sm">
+              <thead className="bg-[#181a1f] text-stone-400 text-[11px] uppercase tracking-wider border-b border-stone-800">
+                <tr>
+                  <th className="p-4 w-12 text-center">#</th>
+                  <th className="p-4">ឈ្មោះភ្ញៀវកិត្តិយស</th>
+                  <th className="p-4">ស្ថានភាពផ្ញើ</th>
+                  <th className="p-4 text-right">សកម្មភាព (Actions)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-800/60 font-sans">
+                {filteredGuests.map((guest, idx) => {
+                  const guestUrl = getGuestUrl(guest.name);
+                  const guestMsg = getInvitationMessage(guest.name);
+
+                  return (
+                    <tr key={guest.id} className="hover:bg-stone-800/30 transition">
+                      <td className="p-4 text-center font-mono text-stone-500">{idx + 1}</td>
+                      <td className="p-4 font-semibold text-stone-200">
+                        {guest.name}
+                      </td>
+                      <td className="p-4">
+                        {guest.sent_status ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                            <Check className="w-3 h-3" /> បានផ្ញើរួច
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center text-[11px] font-medium text-stone-400 bg-stone-800 px-2.5 py-1 rounded-full">
+                            មិនទាន់ផ្ញើ
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="inline-flex items-center gap-2">
+                          
+                          {/* 1-Click Telegram Direct Send */}
+                          <button
+                            onClick={() => handleSendTelegram(guest)}
+                            className="bg-[#229ED9] hover:bg-[#1E88E5] text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow active:scale-95 transition"
+                            title="ចុចដើម្បីផ្ញើចូល Telegram ភ្ញៀវភ្លាមៗ"
+                          >
+                            <Send className="w-3.5 h-3.5" /> ផ្ញើ Telegram
+                          </button>
+
+                          {/* Copy Full Message */}
+                          <button
+                            onClick={() => handleCopy(guest.id, guestMsg)}
+                            className="p-2 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 transition"
+                            title="ចម្លងសារអញ្ជើញពេញលេញ"
+                          >
+                            {copiedId === guest.id ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            ) : (
+                              <MessageSquare className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+
+                          {/* Preview Link */}
+                          <a
+                            href={guestUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 transition"
+                            title="មើលគំរូធៀបការរបស់ភ្ញៀវនេះ"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+
+                          {/* Delete */}
+                          <button
+                            onClick={() => handleDeleteGuest(guest.id)}
+                            className="p-2 rounded-lg bg-stone-800 hover:bg-rose-950 text-stone-400 hover:text-rose-400 transition"
+                            title="លុបឈ្មោះចេញ"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </main>
+
     </div>
   );
 }
