@@ -1,12 +1,18 @@
-/* សម្រួលគម្លាតជួរអក្សរខ្មែរសម្រាប់ចំណងជើងកុំឱ្យជាន់គ្នា */
-.khmer-title-moul {
-  font-family: 'Moul', cursive;
-  font-weight: 400 !important;
-  line-height: 2.3 !important;
-  letter-spacing: 0.05em;
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Kantumruy+Pro:wght@300;400;500;600;700&family=Moul&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0F1115;
+  --foreground: #F3F4F6;
 }
 
-.khmer-body {
+body {
+  background-color: #0F1115;
+  color: #F3F4F6;
   font-family: 'Kantumruy Pro', sans-serif;
-  line-height: 1.8 !important;
+  margin: 0;
+  padding: 0;
 }
