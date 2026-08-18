@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     });
 
     // ២. ផ្ញើទៅ Google Sheets (ដាក់ Link ដែលបងផ្ញើមកមិញ)
-    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwLdHu-zyOuoF-XR3RmudWf5XeikXy7PrmNQAQfYmXy_2SeKFIGOI7ymjx1xA9s4Ty6RA/exec"; 
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbx_mKOXnIozg3CDNyQTW-wXz5l2njFv7WicCwnDpafi-FEib7UXDBVifburWkaxgx9qRg/exec"; 
     
     await fetch(GOOGLE_SHEET_URL, {
       method: 'POST',
