@@ -6,8 +6,8 @@ export async function POST(req: Request) {
     const { type, guest_name, attending, guest_count, message } = body;
 
     // ១. ផ្ញើទៅ Telegram
-    const TELEGRAM_BOT_TOKEN = '7753177651:AAG...'; // ប្ដូរដាក់ Token បង
-    const TELEGRAM_CHAT_ID = '123456789'; // ប្ដូរដាក់ ID បង
+    const TELEGRAM_BOT_TOKEN = '8966135601:AAHOt204E1-LvJ0kHAYvkg_j8GAtnaKAhYw'; // ប្ដូរដាក់ Token បង
+    const TELEGRAM_CHAT_ID = '185222683'; // ប្ដូរដាក់ ID បង
     
     let telegramMessage = type === 'RSVP' 
       ? `🔔 <b>RSVPថ្មី</b>\n👤 ${guest_name}\n📋 ${attending ? '✅ ចូលរួម' : '❌ មិនអាចចូលរួម'}\n👥 ${guest_count} នាក់`
