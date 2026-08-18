@@ -5,9 +5,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { type, guest_name, attending, guest_count, message } = body;
 
-    // ដាក់ Token និង Chat ID ផ្ទាល់នៅទីនេះ ដើម្បីធានាថាវាដំណើរការ ១០០%
-    const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8966135601:AAHOt204E1-LvJ0kHAYvkg_j8GAtnaKAhYw'; // ដាក់ Token របស់អ្នកនៅទីនេះ
-    const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '185222683'; // ដាក់ Chat ID របស់អ្នកនៅទីនេះ
+    const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8966135601:AAHOt204E1-LvJ0kHAYvkg_j8GAtnaKAhYw';
+    const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '185222683';
 
     let telegramMessage = '';
 
@@ -32,13 +31,11 @@ export async function POST(req: Request) {
 
     const result = await response.json();
     if (!result.ok) {
-      console.error('Telegram API Error:', result);
       return NextResponse.json({ success: false, error: result.description }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, message: 'Notification sent successfully' });
   } catch (error) {
-    console.error('Error processing notification:', error);
     return NextResponse.json({ success: false, error: 'Failed to process notification' }, { status: 500 });
   }
 }
