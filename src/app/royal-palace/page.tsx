@@ -75,6 +75,7 @@ function RoyalPalaceContent() {
   return (
     <div className="min-h-screen bg-[#140406] text-stone-100 font-sans selection:bg-amber-500 selection:text-black flex justify-center">
       
+      {/* ផ្ទាំងបើកធៀបដំបូង */}
       {!isOpen && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-gradient-to-b from-[#2A080C] to-[#1A0407] border-2 border-[#DFBA73]/50 rounded-[36px] p-8 text-center shadow-[0_0_50px_rgba(223,186,115,0.25)] space-y-6 relative overflow-hidden">
@@ -99,15 +100,18 @@ function RoyalPalaceContent() {
         </div>
       )}
 
+      {/* ប៊ូតុងបើក/បិទភ្លេង */}
       {isOpen && (
         <button onClick={toggleMusic} className="fixed bottom-6 right-6 z-40 p-4 rounded-full bg-[#DFBA73] text-stone-950 shadow-2xl hover:scale-110 active:scale-95 transition flex items-center justify-center border-2 border-amber-200">
           {isPlaying ? <Volume2 className="w-5 h-5 animate-pulse" /> : <VolumeX className="w-5 h-5" />}
         </button>
       )}
 
+      {/* ខ្លឹមសារធៀបការពេញលេញ */}
       {isOpen && (
         <div className="w-full max-w-md bg-[#1C0507] min-h-screen border-x border-amber-900/40 shadow-2xl relative pb-24">
           
+          {/* Header ឈ្មោះកូនកំលោះ កូនក្រមុំ */}
           <div className="pt-16 pb-10 text-center px-6 space-y-4 relative">
             <div className="w-14 h-14 mx-auto rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-[#DFBA73]">
               <Crown className="w-7 h-7" />
@@ -126,6 +130,7 @@ function RoyalPalaceContent() {
             </div>
           </div>
 
+          {/* កម្មវិធីបុណ្យ */}
           <div className="px-6 py-6 space-y-4 border-t border-amber-900/30">
             <div className="text-center space-y-1">
               <h3 className="font-['Moul'] text-base text-amber-100" style={{ lineHeight: '1.8' }}>កម្មវិធីសិរីមង្គល</h3>
@@ -149,16 +154,18 @@ function RoyalPalaceContent() {
             </div>
           </div>
 
+          {/* ទីតាំង Google Maps */}
           <div className="px-6 py-6 space-y-4 border-t border-amber-900/30">
             <div className="text-center space-y-1">
               <h3 className="font-['Moul'] text-base text-amber-100" style={{ lineHeight: '1.8' }}>ទីតាំងប្រារព្ធពិធី</h3>
               <p className="text-xs text-stone-400">ឌឹ ព្រេមៀ សែនសុខ (អគារ A)</p>
             </div>
-            <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="w-full bg-[#DFBA73] text-stone-950 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg transition">
+            <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="w-full bg-[#DFBA73] text-stone-950 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg transition hover:brightness-105">
               <MapPin className="w-4 h-4" /> បើកមើលលើ Google Maps
             </a>
           </div>
 
+          {/* ចំណងដៃ KHQR */}
           <div className="px-6 py-6 space-y-4 border-t border-amber-900/30 text-center">
             <div className="space-y-1">
               <h3 className="font-['Moul'] text-base text-amber-100" style={{ lineHeight: '1.8' }}>ចំណងដៃអាពាហ៍ពិពាហ៍</h3>
@@ -170,6 +177,7 @@ function RoyalPalaceContent() {
             </div>
           </div>
 
+          {/* RSVP បញ្ជាក់ការចូលរួម */}
           <div className="px-6 py-6 space-y-4 border-t border-amber-900/30">
             <div className="text-center space-y-1">
               <h3 className="font-['Moul'] text-base text-amber-100" style={{ lineHeight: '1.8' }}>ឆ្លើយតបការចូលរួម</h3>
@@ -193,11 +201,12 @@ function RoyalPalaceContent() {
                     <option value={4}>៤ នាក់ ឬច្រើនជាង</option>
                   </select>
                 )}
-                <button type="submit" className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-stone-950 py-3 rounded-xl text-xs font-bold shadow-lg transition">បញ្ជាក់ការចូលរួម</button>
+                <button type="submit" className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-stone-950 py-3 rounded-xl text-xs font-bold shadow-lg transition hover:brightness-105">បញ្ជាក់ការចូលរួម</button>
               </form>
             )}
           </div>
 
+          {/* សារជូនពរ */}
           <div className="px-6 py-6 space-y-4 border-t border-amber-900/30">
             <div className="text-center space-y-1">
               <h3 className="font-['Moul'] text-base text-amber-100" style={{ lineHeight: '1.8' }}>ជូនពរគូស្វាមីភរិយាថ្មី</h3>
