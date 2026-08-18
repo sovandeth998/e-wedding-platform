@@ -5,37 +5,31 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { type, guest_name, attending, guest_count, message } = body;
 
-    const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8966135601:AAHOt204E1-LvJ0kHAYvkg_j8GAtnaKAhYw';
-    const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '185222683';
+    // ១. ផ្ញើទៅ Telegram
+    const TELEGRAM_BOT_TOKEN = '7753177651:AAG...'; // Token របស់បង
+    const TELEGRAM_CHAT_ID = '123456789'; // Chat ID របស់បង
+    
+    let telegramMessage = type === 'RSVP' 
+      ? `🔔 <b>RSVPថ្មី</b>\n👤 ${guest_name}\n📋 ${attending ? '✅ ចូលរួម' : '❌ មិនអាចចូលរួម'}\n👥 ${guest_count} នាក់`
+      : `💌 <b>សារជូនពរ</b>\n👤 ${guest_name}\n💬 "${message}"`;
 
-    let telegramMessage = '';
-
-    if (type === 'RSVP') {
-      const status = attending ? '✅ ចូលរួម' : '❌ មិនអាចចូលរួម';
-      const countText = attending ? `\n👥 ចំនួនភ្ញៀវ: ${guest_count} នាក់` : '';
-      telegramMessage = `🔔 <b>មានការឆ្លើយតបថ្មី (RSVP)</b>\n\n👤 ភ្ញៀវ: <b>${guest_name}</b>\n📋 ស្ថានភាព: ${status}${countText}\n⏰ ពេលវេលា: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Phnom_Penh' })}`;
-    } else if (type === 'WISH') {
-      telegramMessage = `💌 <b>មានសារជូនពរថ្មី</b>\n\n👤 ពីភ្ញៀវ: <b>${guest_name}</b>\n💬 សារ:\n<i>"${message}"</i>\n\n⏰ ពេលវេលា: ${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Phnom_Penh' })}`;
-    }
-
-    const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    const response = await fetch(telegramUrl, {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: telegramMessage,
-        parse_mode: 'HTML',
-      }),
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: telegramMessage, parse_mode: 'HTML' }),
     });
 
-    const result = await response.json();
-    if (!result.ok) {
-      return NextResponse.json({ success: false, error: result.description }, { status: 400 });
-    }
+    // ២. ផ្ញើទៅ Google Sheets (យក URL ដែលបងទើបផ្ញើមក មិញមកដាក់ទីនេះ)
+    const GOOGLE_SHEET_URL = "AKfycbwLdHu-zyOuoF-XR3RmudWf5XeikXy7PrmNQAQfYmXy_2SeKFIGOI7ymjx1xA9s4Ty6RA"; 
+    
+    await fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'Application/json' },
+      body: JSON.stringify({ guest_name, attending, guest_count, message })
+    });
 
-    return NextResponse.json({ success: true, message: 'Notification sent successfully' });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to process notification' }, { status: 500 });
+    return NextResponse.json({ success: false }, { status: 500 });
   }
 }
